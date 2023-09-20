@@ -1,0 +1,1 @@
+// 开发环境配置webpack.config.dev.js 主要用于开发环境配置，主要是 devServer、API mock 等相关配置，这部分配置注重的是效率，所以打包速度优化也是很重要的。

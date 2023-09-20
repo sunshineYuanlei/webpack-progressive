@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+      "outFile": "dist/main.js",
+      "sourceMap": true
+  },
+  "files": ["src/index.ts", "src/source.ts"]
+}

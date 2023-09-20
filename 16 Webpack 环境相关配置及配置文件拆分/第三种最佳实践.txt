@@ -1,0 +1,2 @@
+Tips：这是因为我们所有的入口文件都是webpack.config.js。
+当然如果我们使用 Webpack 的时候，就已经在npm scripts里面区分了配置文件（webpack --config webpack.production.js），就不在讨论范围之内了。

@@ -1,0 +1,2 @@
+// "dev": "webpack --mode development ./src/es/index.js -o ./output/main2.js",
+// "build": "webpack --mode production ./src/es/index.js -o ./output/main2.js"

@@ -1,0 +1,137 @@
+// {
+//   "presets": ["@babel/preset-env"]
+// }
+{
+  // env 选项的值将从 process.env.BABEL_ENV 获取，如果没有的话，则获取 process.env.NODE_ENV 的值，它也无法获取时会设置为 "development"。
+  "env": {
+    "production": {
+      "presets": ["@babel/preset-env"]
+    }
+  },
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        // useBuiltIns和target成对使用, useBuiltIns对@babel/polyfill做处理, target进一步过滤polyfill
+        // 注意, 在需要polyfill的地方需要手动引入 import "@babel/polyfill";
+        // "useBuiltIns": "usage|entry|false",
+        // 最佳实践
+        "useBuiltIns": "usage",
+        // 需要提一下的是，polyfill 用到的core-js是可以指定版本的，比如使用 core-js@3，则首先安装依赖npm i -S core-js@3，然后在 Babel 配置文件.babelrc中写上版本。
+        "corejs": 3,
+        // 假设希望代码中使用 ES6 的模板字面量\``语法，但是实际执行代码的宿主浏览器是 IE 10 却不支持，那么我们可以使用target`指定目标浏览器了。
+        "targets": {
+          // "browsers": "IE 10"
+          "edge": "17",
+          "firefox": "60",
+          "chrome": "67",
+          "safari": "11.1"
+          // 如果我们代码是在 Node.js 环境执行的，则可以指定 Node.js 的版本号：
+          // "node": "8.9.3"
+        }
+        // tips:
+        // 1. targets.browsers 需要使用 browserslist 的配置方法，但是其设置会被 targets.[chrome, opera, edge, firefox, safari, ie, ios, android, node, electron] 覆盖；
+        // 2. targets.node 设置为 true 或 "current" 可以根据当前 Node.js 版本进行动态转换。也可以设置为具体的数字表示需要支持的最低 Node.js 版本；
+        // 3. targets.esmodules 设置使用 ES Modules 语法，最新浏览器支持，这个在后面 Webpack 插件章节会详细介绍如何实现 Modern Mode。
+      }
+    ]
+  ],
+  "plugins": [
+    // 扩展class和箭头函数转换器
+    // "@babel/plugin-transform-runtime",
+    // "@babel/plugin-proposal-class-properties"
+    ["@babel/plugin-transform-runtime", { "corejs": 2 }],
+    ["@babel/plugin-proposal-class-properties", { "loose": false }]
+    // 命令行使用示例:
+    // npx babel src --out-dir lib
+  ]
+}
+
+// Tips：’@babel/polyfill’实际是core-js和regenerator-runtime的合集，所以如果要按需引入’@babel/polyfill’的某个模块，可以直接引入对应的 core-js 模块，但是手动引入的方式还是太费劲。
+
+// 通过上面的介绍，我们可能觉得useBuiltIns：'usage'可以完美的解决我们的 Polyfill 问题，它是按需引入模块，根据.browserslist+业务实际代码来设置引入 Polyfill，不会多余的引入。但是在我们构建的时候发现实际还是有问题的：
+
+// const asyncFun = async () => {
+//     await new Promise(setTimeout, 2e3);
+
+//     return '2s之后才返回该字符串';
+// };
+// export default asyncFun;
+// 根据上述的 useBuiltIns：‘usage’ 配置编译后：
+
+// import 'core-js/modules/es6.promise';
+// import 'regenerator-runtime/runtime';
+
+// function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+//     // asyncGeneratorStep
+// }
+
+// function _asyncToGenerator(fn) {
+//     // _asyncToGenerator 源码
+// }
+
+// var asyncFun =
+//     /*#__PURE__*/
+//     (function() {
+//         var _ref = _asyncToGenerator(
+//             /*#__PURE__*/
+//             regeneratorRuntime.mark(function _callee() {
+//                 return regeneratorRuntime.wrap(
+//                     function _callee$(_context) {
+//                         while (1) {
+//                             switch ((_context.prev = _context.next)) {
+//                                 case 0:
+//                                     _context.next = 2;
+//                                     return new Promise(setTimeout, 2000);
+
+//                                 case 2:
+//                                     return _context.abrupt('return', '2s之后才返回该字符串');
+
+//                                 case 3:
+//                                 case 'end':
+//                                     return _context.stop();
+//                             }
+//                         }
+//                     },
+//                     _callee,
+//                     this
+//                 );
+//             })
+//         );
+
+//         return function asyncFun() {
+//             return _ref.apply(this, arguments);
+//         };
+//     })();
+
+// export default asyncFun;
+// 通过上述的构建之后的代码，我们发现asyncGeneratorStep和 _asyncToGenerator 这两个函数是被内联进来，而不是 import 进来的。如果这样的话，在多个文件中用到了async和await关键字，那么每个文件都会编译一遍asyncGeneratorStep和 _asyncToGenerator函数。这样的代码明显是重复了，我们再解决这个问题，Babel polyfill 的方案就完美了，要解决这个问题，需要用到@babel/plugin-transform-runtime这个 Babel 插件。
+// 我们知道 Babel 在每个需要转换的代码前面都会插入一些helpers代码，这可能会导致多个文件都会有重复的 helpers 代码。 @babel/plugin-transform-runtime 的 helpers 选项就可以把这些代码抽离出来。
+// 最佳实践：
+
+// {
+//   "plugins": [
+//       [
+//           "@babel/plugin-transform-runtime",
+//           {
+//               "corejs": false, // 默认值，可以不写
+//               "helpers": true, // 默认，可以不写
+//               "regenerator": false, // 通过 preset-env 已经使用了全局的 regeneratorRuntime, 不再需要 transform-runtime 提供的 不污染全局的 regeneratorRuntime
+//               "useESModules": true // 使用 es modules helpers, 减少 commonJS 语法代码
+//           }
+//       ]
+//   ],
+//   "presets": [
+//       [
+//           "@babel/preset-env",
+//           {
+                 // 进一步过滤
+//               "targets": {}, // 这里是targets的配置，根据实际browserslist设置
+//               "corejs": 3, // 添加core-js版本
+//               "modules": false, // 模块使用 es modules ，不使用 commonJS 规范
+                 // 按需引入
+//               "useBuiltIns": "usage" // 默认 false, 可选 entry , usage
+//           }
+//       ]
+//   ]
+// }

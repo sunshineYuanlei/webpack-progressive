@@ -1,0 +1,49 @@
+{
+  "env": {
+    "browser": true,
+    "es6": true
+  },
+  "extends": "airbnb",
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly"
+  },
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "rules": {
+    // 禁止 console，要用写 eslint disbale
+    "no-console": 2,
+    // 禁止 debugger，防止上线
+    "no-debugger": 2,
+    // 禁止 alert，要用写 eslint disable
+    "no-alert": 2,
+    // 不用的 var，要删除，手动 tree shaking，要洁癖
+    "no-unused-vars": 2,
+    // 没定义就用的就别用，全局的要用 写 eslint global
+    "no-undef": 2
+  }
+}
+
+// Tips:
+// 一般 ESLint 的 rules 需要根据团队的规范来制定，出了这点之外，我个人推荐添加下面几点 rule：
+// {
+//   'rules': {
+//       // 禁止 console，要用写 eslint disbale
+//       'no-console': 2,
+//       // 禁止 debugger，防止上线
+//       'no-debugger': 2,
+//       // 禁止 alert，要用写 eslint disable
+//       'no-alert': 2,
+//       // 不用的 var，要删除，手动 tree shaking，要洁癖
+//       'no-unused-vars': 2,
+//       // 没定义就用的就别用，全局的要用 写 eslint global
+//       'no-undef': 2
+//   }
+// }
+
+// 这几个 rule 是为了防止线下 debug 代码上到线上去的，曾经有段血泪史一不小心将alert和debugger上到线上去，加上这几个 rule 就可以得到代码提示，如果在代码中真的需要用到alert，可以使用 ESLint 的注释：
+
+// eslint-disable-next-line
+// alert('我就是要用 alert'); // eslint-disable-line

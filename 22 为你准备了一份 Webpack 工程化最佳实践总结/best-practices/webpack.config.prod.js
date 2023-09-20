@@ -1,0 +1,2 @@
+// webpack.config.prod.js用于生产环境配置，这部分配置注重的是线上最优打包配置，包括splitChunks、压缩资源、CDN 路径配置（在output配置）等相关配置，还可以在terser-webpack-plugin配置中强制去除一些忘记删除的调试信息：例如 debugger、alert。
+// Tips：生产环境打包不建议生成 sourcemap，如果生成了也不要上传到线上环境，因为如果 sourcemap 上线之后，等于别人就可以通过 Chrome 等工具直接查看线上代码的源码，这是十分危险的！但是如果你项目使用类似Sentry的 JavaScript 报错收集分析平台，可以将 sourcemap 经过 Webpack 生成，上传到对应的平台之后记得删除上线包中的这些文件，防止上传到线上！

@@ -1,0 +1,19 @@
+{
+  // 使用 IntelliSense 了解相关属性。
+  // 悬停以查看现有属性的描述。
+  // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+  
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "调试webpack",
+      "skipFiles": ["<node_internals>/**"],
+      // 工作路径
+      "cwd": "${workspaceFolder}",
+      // 被调试文件的路径，以${workspaceFolder}开头
+      "program": "${workspaceFolder}\\node_modules\\webpack\\bin\\webpack.js"
+    }
+  ]
+}

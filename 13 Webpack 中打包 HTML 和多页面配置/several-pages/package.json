@@ -1,0 +1,17 @@
+{
+  "name": "several-pages",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "globby": "^13.2.2",
+    "html-webpack-plugin": "^5.5.3",
+    "webpack-cli": "^5.1.4"
+  }
+}

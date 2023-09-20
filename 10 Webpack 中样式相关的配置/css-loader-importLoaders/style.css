@@ -1,0 +1,7 @@
+@import 'body.css';
+body {
+    font-size: 20px;
+}
+div {
+    display: flex;
+}
